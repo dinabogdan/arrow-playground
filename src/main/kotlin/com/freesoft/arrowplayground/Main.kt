@@ -1,6 +1,7 @@
 package com.freesoft.arrowplayground
 
 import arrow.core.Try
+import arrow.effects.IO
 import java.security.SecureRandom
 
 private val random = SecureRandom()
@@ -19,18 +20,8 @@ fun main() {
         val number = random.nextInt(5) + 1
         println("Dear $name, please guess a number from 1 to 5: ")
         evaluate(number, name)
-        println("Do you want to continue, $name?")
-        var cont = true
-        while (cont) {
-            when (readLine()?.toLowerCase()) {
-                "y" -> exec = true
-                "n" -> exec = false
-                else -> cont = true
-            }
-        }
-
+        checkContinue(name)
     }
-    println("Hello world!")
 }
 
 private fun evaluate(number: Int, name: String?) {
@@ -44,3 +35,20 @@ private fun evaluate(number: Int, name: String?) {
                     }
             )
 }
+
+private fun checkContinue(name: String?): Boolean {
+    println("Do you want to continue, $name?")
+    return (readLine() as String).transform { it.toLowerCase() }
+            .transform {
+                when (it) {
+                    "y" -> true
+                    "n" -> false
+                    else -> checkContinue(name)
+                }
+            }
+}
+
+private fun <T> String.transform(f: (String) -> T) = f(this)
+
+private fun putStrLn(line: String): IO<Unit> = IO { println(line) }
+private fun readStrLn(): IO<String?> = IO { readLine() }
